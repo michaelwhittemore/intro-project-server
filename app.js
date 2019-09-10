@@ -44,3 +44,13 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
+//run on localhost:3000
+const port=3000
+app.listen(port, (err) => {
+  if (err) {
+    return console.log('something bad happened', err)
+  }
+
+  console.log(`server is listening on ${port}`)
+})

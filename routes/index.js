@@ -3,6 +3,8 @@ var router = express.Router();
 var path = require('path');
 var _ = require('lodash');
 const uuidv1 = require('uuid/v1'); //required to generate user ids
+require('dotenv').config(); //needs keys from .env
+
 
 
 var apiKey = process.env.TOKBOX_API_KEY;
@@ -225,3 +227,4 @@ router.get('/archive', function (req, res) {
 });
 
 module.exports = router;
+
