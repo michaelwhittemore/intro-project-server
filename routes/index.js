@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 var _ = require('lodash');
+const uuidv1 = require('uuid/v1'); //required to generate user ids
+
 
 var apiKey = process.env.TOKBOX_API_KEY;
 var secret = process.env.TOKBOX_SECRET;
@@ -11,7 +13,7 @@ if (!apiKey || !secret) {
   console.error('');
   console.error('Missing TOKBOX_API_KEY or TOKBOX_SECRET');
   console.error('Find the appropriate values for these by logging into your TokBox Dashboard at: https://tokbox.com/account/#/');
-  console.error('Then add them to ', path.resolve('.env'), 'or as environment variables' );
+  console.error('Then add them to ', path.resolve('.env'), 'or as environment variables');
   console.error('');
   console.error('=========================================================================================================');
   process.exit();
@@ -26,6 +28,10 @@ var opentok = new OpenTok(apiKey, secret);
 // application you should consider a more persistent storage
 
 var roomToSessionIdDictionary = {};
+//user arrays should take the form of a an array of objects:
+//each containing a userID, a grouping, credentials and a current session
+let userArray = [];
+
 
 // returns the room name, given a session ID that was associated with it
 function findRoomFromSessionId(sessionId) {
@@ -91,6 +97,21 @@ router.get('/room/:name', function (req, res) {
     });
   }
 });
+
+/**
+ * //?? should this be more of a GET or POST request?? 
+ * GET /newUser returns a new userID with a respective role
+ */
+
+router.get('/newUser', function (req, res) {
+  let userID = uuidv1();
+  //if depending on how many people are in the group assign either idea or investor 
+  let userRole = userArray.length % 2 === 0 ? 'investor' : 'idea';
+  let userObject = {'userID':userID, 'userRole':userRole}
+  userArray.push(userObject)
+  res.send(userObject)
+
+})
 
 /**
  * POST /archive/start
