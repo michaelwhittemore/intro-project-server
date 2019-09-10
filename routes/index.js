@@ -111,6 +111,7 @@ router.get('/newUser', function (req, res) {
   console.log(userObject)
   console.log(userArray)
   userArray.push(userObject)
+  res.setHeader('Content-Type', 'application/json');
   res.send(userObject)
 
 })
