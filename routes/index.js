@@ -108,6 +108,8 @@ router.get('/newUser', function (req, res) {
   //if depending on how many people are in the group assign either idea or investor 
   let userRole = userArray.length % 2 === 0 ? 'investor' : 'idea';
   let userObject = {'userID':userID, 'userRole':userRole}
+  console.log(userObject)
+  console.log(userArray)
   userArray.push(userObject)
   res.send(userObject)
 
