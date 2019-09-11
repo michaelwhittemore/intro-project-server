@@ -79,13 +79,13 @@ function getNewSessionCrendtials(userId, userSessionDict) {
 }
 // makeMatchCredentials should take in an id, the id of the matched user, and the dict, previousMatches
 //needs to return the credentials and also modiy the dict and also add to the matched array
-function makeMatchCredentials(id,matchedId,userSessionDict,previousMatches){
+function makeMatchCredentials(id, matchedId, userSessionDict, previousMatches) {
   let sessionId = userSessionDict[matchedId];
   let token = opentok.generateToken(sessionId);
   //now that the match is made we remove it from the dict
   delete userSessionDict[matchedId]
   //add the match to the previous matches
-  previousMatches.push([id,matchedId])
+  previousMatches.push([id, matchedId])
   return {
     apiKey: apiKey,
     sessionId: sessionId,
@@ -125,20 +125,20 @@ router.post('/queue', function (req, res) {
   let resCredentials
   if (userRole === 'investor') {
     match = findMatch(userId, ideaQueue, previousMatches)
-    if (match) { 
+    if (match) {
       //should only do matching if we found a match
-      resCredentials=makeMatchCredentials(userId, match,userSessionDict,previousMatches)
-    } else { 
+      resCredentials = makeMatchCredentials(userId, match, userSessionDict, previousMatches)
+    } else {
       //otherwise we generate a new session and send the credentials and put in queue
       resCredentials = getNewSessionCrendtials(userId, userSessionDict)
       investorQueue.push(userId)
     }
   } else if (userRole === 'idea') {
     match = findMatch(userId, investorQueue, previousMatches)
-    if (match) { 
+    if (match) {
       //should only do matching if we found a match
-      resCredentials=makeMatchCredentials(userId, match,userSessionDict,previousMatches)
-    } else { 
+      resCredentials = makeMatchCredentials(userId, match, userSessionDict, previousMatches)
+    } else {
       //otherwise we generate a new session and send the credentials and put in queue
       resCredentials = getNewSessionCrendtials(userId, userSessionDict)
       ideaQueue.push(userId)
@@ -148,8 +148,24 @@ router.post('/queue', function (req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.send(resCredentials)
 })
+//get everything in the server state 
+//PURELY TROUBLESHOOTING
+router.get('/servertest', function (req, res) {
+  console.log('userArray', userArray)
+  console.log('ideaQueue', ideaQueue)
+  console.log('investorQueue', investorQueue)
+  console.log('previousMatches', previousMatches)
+  console.log('userSessionDict', userSessionDict)
 
-
+  res.setHeader('Content-Type', 'application/json');
+  res.send({
+    userArray: userArray,
+    ideaQueue: ideaQueue,
+    investorQueue: investorQueue,
+    previousMatches: previousMatches,
+    userSessionDict: userSessionDict
+  })
+})
 router.get('/', function (req, res) {
   res.render('index', { title: 'Learning-OpenTok-Node' });
 });
