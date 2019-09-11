@@ -69,6 +69,7 @@ function getNewSessionCrendtials(userId, userSessionDict) {
       console.log('token: (from within getNewSessionCrentials) '+token);
     }
   })
+  console.log('token',token,'sessionId',sessionId)
   //add the session to the dict with the userId as the Key
   console.log('userSessionDict before the addition',userSessionDict,'userid',userId)
   userSessionDict[userId] = sessionId
