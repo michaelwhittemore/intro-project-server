@@ -93,7 +93,7 @@ function makeMatchCredentials(id, matchedId, userSessionDict, previousMatches) {
   previousMatches.push([id, matchedId])
   console.log('sessionId from makeMatchCredentials', sessionId)
   console.log('token from makeMatchCredentials', token)
-  console.log('resCredentials from within the /queue route ', resCredentials)
+
   //then send the resoponse
   res.setHeader('Content-Type', 'application/json');
   res.send({
