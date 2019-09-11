@@ -54,7 +54,7 @@ function findMatch(userId, queue, previousMatches) {
 }
 
 //start new session, add it to the dict, and return an object conating all the necessary cred
-function getNewSessionCrendtials(userId, userSessionDict) {
+function getNewSessionCrendtials(userId, userSessionDict, res) {
   //create the session
   let sessionId;
   let token
@@ -66,19 +66,21 @@ function getNewSessionCrendtials(userId, userSessionDict) {
       console.log("sessionId: (from within getNewSessionCrentials) " + sessionId);
       //generate a publisher toekn
       token = opentok.generateToken(sessionId);
-      console.log('token: (from within getNewSessionCrentials) '+token);
+      console.log('token: (from within getNewSessionCrentials) ' + token);
     }
+    console.log('token', token, 'sessionId', sessionId)
+    //add the session to the dict with the userId as the Key
+    console.log('userSessionDict before the addition', userSessionDict, 'userid', userId)
+    userSessionDict[userId] = sessionId
+    console.log('userSessionDict after the addition', userSessionDict)
+    res.setHeader('Content-Type', 'application/json');
+    res.send({
+      apiKey: apiKey,
+      sessionId: sessionId,
+      token: token
+    })
+
   })
-  console.log('token',token,'sessionId',sessionId)
-  //add the session to the dict with the userId as the Key
-  console.log('userSessionDict before the addition',userSessionDict,'userid',userId)
-  userSessionDict[userId] = sessionId
-  console.log('userSessionDict after the addition',userSessionDict)
-  return {
-    apiKey: apiKey,
-    sessionId: sessionId,
-    token: token
-  }
 }
 // makeMatchCredentials should take in an id, the id of the matched user, and the dict, previousMatches
 //needs to return the credentials and also modiy the dict and also add to the matched array
@@ -89,14 +91,16 @@ function makeMatchCredentials(id, matchedId, userSessionDict, previousMatches) {
   delete userSessionDict[matchedId]
   //add the match to the previous matches
   previousMatches.push([id, matchedId])
-  console.log('sessionId from makeMatchCredentials',sessionId)
-  console.log('token from makeMatchCredentials',token)
-
-  return {
+  console.log('sessionId from makeMatchCredentials', sessionId)
+  console.log('token from makeMatchCredentials', token)
+  console.log('resCredentials from within the /queue route ', resCredentials)
+  //then send the resoponse
+  res.setHeader('Content-Type', 'application/json');
+  res.send({
     apiKey: apiKey,
     sessionId: sessionId,
     token: token
-  }
+  })
 }
 
 
@@ -121,37 +125,33 @@ router.get('/newUser', function (req, res) {
 
 router.post('/queue', function (req, res) {
   let bodyJSON = req.body
-  console.log('bodyJSON',bodyJSON)
+  console.log('bodyJSON', bodyJSON)
   let userRole = bodyJSON['userRole']
   let userId = bodyJSON['userId']
 
   let match
-  let resCredentials
   if (userRole === 'investor') {
     match = findMatch(userId, ideaQueue, previousMatches)
     if (match) {
       //should only do matching if we found a match
-      resCredentials = makeMatchCredentials(userId, match, userSessionDict, previousMatches)
+      rmakeMatchCredentials(userId, match, userSessionDict, previousMatches)
     } else {
       //otherwise we generate a new session and send the credentials and put in queue
-      resCredentials = getNewSessionCrendtials(userId, userSessionDict)
+      getNewSessionCrendtials(userId, userSessionDict, res)
       investorQueue.push(userId)
     }
   } else if (userRole === 'idea') {
     match = findMatch(userId, investorQueue, previousMatches)
     if (match) {
       //should only do matching if we found a match
-      resCredentials = makeMatchCredentials(userId, match, userSessionDict, previousMatches)
+      makeMatchCredentials(userId, match, userSessionDict, previousMatches)
     } else {
       //otherwise we generate a new session and send the credentials and put in queue
-      resCredentials = getNewSessionCrendtials(userId, userSessionDict)
+      getNewSessionCrendtials(userId, userSessionDict, res)
       ideaQueue.push(userId)
     }
   }
-  console.log('resCredentials from within the /queue route ',resCredentials)
-  //then send the resoponse
-  res.setHeader('Content-Type', 'application/json');
-  res.send(resCredentials)
+
 })
 //get everything in the server state 
 //PURELY TROUBLESHOOTING
