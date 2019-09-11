@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 var _ = require('lodash');
-const uuIdv1 = require('uuId/v1'); //required to generate user Ids
+const uuidv1 = require('uuid/v1'); //required to generate user Ids
 require('dotenv').config(); //needs keys from .env
 
 
@@ -100,7 +100,7 @@ function makeMatchCredentials(id,matchedId,userSessionDict,previousMatches){
  */
 
 router.get('/newUser', function (req, res) {
-  let userId = uuIdv1();
+  let userId = uuidv1();
   //if depending on how many people are in the group assign either idea or investor 
   let userRole = userArray.length % 2 === 0 ? 'investor' : 'idea';
   let userObject = { 'userId': userId, 'userRole': userRole }
