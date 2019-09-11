@@ -84,11 +84,13 @@ function getNewSessionCrendtials(userId, userSessionDict, res) {
 }
 // makeMatchCredentials should take in an id, the id of the matched user, and the dict, previousMatches
 //needs to return the credentials and also modiy the dict and also add to the matched array
-function makeMatchCredentials(id, matchedId, userSessionDict, previousMatches) {
+function makeMatchCredentials(id, matchedId, userSessionDict, previousMatches,res) {
   let sessionId = userSessionDict[matchedId];
   let token = opentok.generateToken(sessionId);
   //now that the match is made we remove it from the dict
   delete userSessionDict[matchedId]
+  delete ideaQueue[matchedId]
+  delete investorQueue[matchedId]
   //add the match to the previous matches
   previousMatches.push([id, matchedId])
   console.log('sessionId from makeMatchCredentials', sessionId)
@@ -134,7 +136,7 @@ router.post('/queue', function (req, res) {
     match = findMatch(userId, ideaQueue, previousMatches)
     if (match) {
       //should only do matching if we found a match
-      rmakeMatchCredentials(userId, match, userSessionDict, previousMatches)
+      makeMatchCredentials(userId, match, userSessionDict, previousMatches,res)
     } else {
       //otherwise we generate a new session and send the credentials and put in queue
       getNewSessionCrendtials(userId, userSessionDict, res)
@@ -144,7 +146,7 @@ router.post('/queue', function (req, res) {
     match = findMatch(userId, investorQueue, previousMatches)
     if (match) {
       //should only do matching if we found a match
-      makeMatchCredentials(userId, match, userSessionDict, previousMatches)
+      makeMatchCredentials(userId, match, userSessionDict, previousMatches,res)
     } else {
       //otherwise we generate a new session and send the credentials and put in queue
       getNewSessionCrendtials(userId, userSessionDict, res)
