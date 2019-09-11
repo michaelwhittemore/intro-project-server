@@ -66,7 +66,7 @@ function getNewSessionCrendtials(userId, userSessionDict) {
       console.log("Session Id: " + sessionId);
       //generate a publisher toekn
       token = opentok.generateToken(sessionId);
-      console.log(token);
+      console.log('token: '+token);
     }
   })
   //add the session to the dict with the userId as the Key
@@ -105,8 +105,6 @@ router.get('/newUser', function (req, res) {
   let userRole = userArray.length % 2 === 0 ? 'investor' : 'idea';
   let userObject = { 'userId': userId, 'userRole': userRole }
   userArray.push(userObject)
-  console.log(userObject)
-  console.log(userArray)
   res.setHeader('Content-Type', 'application/json');
   res.send(userObject)
 
@@ -117,7 +115,8 @@ router.get('/newUser', function (req, res) {
 
 router.post('/queue', function (req, res) {
   let bodyJSON = req.body
-  console.log(bodyJSON)
+  console.log('req',req)
+  console.log('bodyJSON',bodyJSON)
   let userRole = bodyJSON['userRole']
   let userId = bodyJSON['userId']
 
