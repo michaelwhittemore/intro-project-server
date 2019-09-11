@@ -63,10 +63,10 @@ function getNewSessionCrendtials(userId, userSessionDict) {
       console.log("Error creating session:", error)
     } else {
       sessionId = session.sessionId;
-      console.log("Session Id: " + sessionId);
+      console.log("sessionId: (from within getNewSessionCrentials) " + sessionId);
       //generate a publisher toekn
       token = opentok.generateToken(sessionId);
-      console.log('token: '+token);
+      console.log('token: (from within getNewSessionCrentials) '+token);
     }
   })
   //add the session to the dict with the userId as the Key
@@ -86,6 +86,9 @@ function makeMatchCredentials(id, matchedId, userSessionDict, previousMatches) {
   delete userSessionDict[matchedId]
   //add the match to the previous matches
   previousMatches.push([id, matchedId])
+  console.log('sessionId from makeMatchCredentials',sessionId)
+  console.log('token from makeMatchCredentials',token)
+
   return {
     apiKey: apiKey,
     sessionId: sessionId,
@@ -115,7 +118,6 @@ router.get('/newUser', function (req, res) {
 
 router.post('/queue', function (req, res) {
   let bodyJSON = req.body
-  console.log('req',req)
   console.log('bodyJSON',bodyJSON)
   let userRole = bodyJSON['userRole']
   let userId = bodyJSON['userId']
@@ -143,6 +145,7 @@ router.post('/queue', function (req, res) {
       ideaQueue.push(userId)
     }
   }
+  console.log('resCredentials from within the /queue route ',resCredentials)
   //then send the resoponse
   res.setHeader('Content-Type', 'application/json');
   res.send(resCredentials)
