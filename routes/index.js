@@ -70,7 +70,9 @@ function getNewSessionCrendtials(userId, userSessionDict) {
     }
   })
   //add the session to the dict with the userId as the Key
+  console.log('userSessionDict before the addition',userSessionDict,'userid',userId)
   userSessionDict[userId] = sessionId
+  console.log('userSessionDict after the addition',userSessionDict)
   return {
     apiKey: apiKey,
     sessionId: sessionId,
