@@ -61,18 +61,14 @@ function getNewSessionCrendtials(userId, res) {
       console.log('Error creating session:', error);
     } else {
       sessionId = session.sessionId;
-      console.log('sessionId: (from within getNewSessionCrentials) ' + sessionId);
       // generate a publisher toekn
       token = opentok.generateToken(sessionId);
-      console.log('token: (from within getNewSessionCrentials) ' + token);
     }
-    console.log('token', token, 'sessionId', sessionId);
     // add the session to the dict with the userId as the Key
-    console.log('userSessionDict before the addition', userSessionDict, 'userid', userId);
     userSessionDict[userId] = sessionId;
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    console.log('res.header()', res.header());
+    console.log(res.getHeaders())
     res.send({
       apiKey: apiKey,
       sessionId: sessionId,
@@ -91,15 +87,15 @@ function makeMatchCredentials(id, matchedId, res) {
   delete investorQueue[matchedId];
   // add the match to the previous matches
   previousMatches.push([id, matchedId]);
-  console.log('sessionId from makeMatchCredentials', sessionId);
-  console.log('token from makeMatchCredentials', token);
 
   // then send the resoponse
   res.set({
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*'
   });
-  
+  // MAKE MATCH ---------------------------------------- THIS MATTERS
+  // -----------------------------------------------------------------
+  // -----------------------------------------------------------------
   res.send({
     apiKey: apiKey,
     sessionId: sessionId,
