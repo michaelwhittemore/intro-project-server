@@ -71,8 +71,10 @@ function getNewSessionCrendtials(userId, res) {
     // add the session to the dict with the userId as the Key
     console.log('userSessionDict before the addition', userSessionDict, 'userid', userId);
     userSessionDict[userId] = sessionId;
-    console.log('userSessionDict after the addition', userSessionDict);
+    
     res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    console.log('res in index', res);
     res.send({
       apiKey: apiKey,
       sessionId: sessionId,

@@ -17,12 +17,10 @@ app.use(cors());
 // trying to allow access
 app.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*');
-  console.log('applied from app.js', res.header); // remove
+  // console.log('applied from app.js', res.header); // remove
   // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
-// uncomment after placing your favicon in /public
-// app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
