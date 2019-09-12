@@ -125,6 +125,7 @@ router.get('/newUser', (req, res) => {
 
 router.post('/queue', (req, res) => {
   // console.log('FULL VALUE OF THE REQ TO QUEUE', req);
+  console.log('get header', res.getHeaders());
   let bodyJSON = req.body;
   // console.log('bodyJSON', bodyJSON);
   let userRole = bodyJSON.userRole;
