@@ -97,7 +97,10 @@ function makeMatchCredentials(id, matchedId, userSessionDict, previousMatches,re
   console.log('token from makeMatchCredentials', token)
 
   //then send the resoponse
-  res.setHeader('Content-Type', 'application/json');
+  res.set({
+    'Content-Type':'application/json',
+    "Access-Control-Allow-Origin":"*"
+    });
   res.send({
     apiKey: apiKey,
     sessionId: sessionId,
@@ -164,7 +167,10 @@ router.get('/servertest', function (req, res) {
   console.log('previousMatches', previousMatches)
   console.log('userSessionDict', userSessionDict)
 
-  res.setHeader('Content-Type', 'application/json');
+  rres.set({
+    'Content-Type':'application/json',
+    "Access-Control-Allow-Origin":"*"
+    });
   res.send({
     userArray: userArray,
     ideaQueue: ideaQueue,
