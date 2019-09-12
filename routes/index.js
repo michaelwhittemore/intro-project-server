@@ -5,7 +5,6 @@ const _ = require('lodash');
 const uuidv1 = require('uuid/v1'); // required to generate user Ids
 require('dotenv').config(); // needs keys from .env
 
-
 const apiKey = process.env.TOKBOX_API_KEY;
 const secret = process.env.TOKBOX_SECRET;
 
@@ -73,7 +72,7 @@ function getNewSessionCrendtials(userId, res) {
     userSessionDict[userId] = sessionId;
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    console.log('res in index', res.header);
+    console.log('res.header()', res.header());
     res.send({
       apiKey: apiKey,
       sessionId: sessionId,
@@ -100,7 +99,7 @@ function makeMatchCredentials(id, matchedId, res) {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*'
   });
-  console.log('res from index', res);
+  
   res.send({
     apiKey: apiKey,
     sessionId: sessionId,
@@ -128,6 +127,7 @@ router.get('/newUser', (req, res) => {
 // first we need to verify that the users haven't already met
 
 router.post('/queue', (req, res) => {
+  console.log('FULL VALUE OF THE REQ TO QUEUE', req);
   let bodyJSON = req.body;
   console.log('bodyJSON', bodyJSON);
   let userRole = bodyJSON.userRole;
