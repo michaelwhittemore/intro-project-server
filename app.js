@@ -16,8 +16,8 @@ app.set('view engine', 'jade');
 app.use(cors());
 //trying to allow access
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  console.log(res.header)//remove
+  res.set("Access-Control-Allow-Origin", "*");
+  console.log('applied from app.js',res.header,res.body)//remove
   //res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 })
