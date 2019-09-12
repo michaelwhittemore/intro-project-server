@@ -53,6 +53,7 @@ function findMatch(userId, queue) {
 
 // start new session, add it to the dict, and return an object conating all the necessary cred
 function getNewSessionCrendtials(userId, res) {
+  console.log("GOT TO NEW SESSIONS")
   // create the session
   let sessionId;
   let token;
@@ -68,7 +69,7 @@ function getNewSessionCrendtials(userId, res) {
     userSessionDict[userId] = sessionId;
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    console.log(res.getHeaders())
+    console.log('getNewSessionCredentials res.getHeaders()', res.getHeaders());
     res.send({
       apiKey: apiKey,
       sessionId: sessionId,
@@ -123,9 +124,9 @@ router.get('/newUser', (req, res) => {
 // first we need to verify that the users haven't already met
 
 router.post('/queue', (req, res) => {
-  console.log('FULL VALUE OF THE REQ TO QUEUE', req);
+  // console.log('FULL VALUE OF THE REQ TO QUEUE', req);
   let bodyJSON = req.body;
-  console.log('bodyJSON', bodyJSON);
+  // console.log('bodyJSON', bodyJSON);
   let userRole = bodyJSON.userRole;
   let userId = bodyJSON.userId;
   let match;
