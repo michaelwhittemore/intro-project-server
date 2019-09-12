@@ -67,8 +67,8 @@ function getNewSessionCrendtials(userId, res) {
     }
     // add the session to the dict with the userId as the Key
     userSessionDict[userId] = sessionId;
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.addHeader('Content-Type', 'application/json');
+    res.addHeader('Access-Control-Allow-Origin', '*');
     console.log('getNewSessionCredentials res.getHeaders()', res.getHeaders());
     res.send({
       apiKey: apiKey,
@@ -125,7 +125,7 @@ router.get('/newUser', (req, res) => {
 
 router.post('/queue', (req, res) => {
   // console.log('FULL VALUE OF THE REQ TO QUEUE', req);
-  console.log('get header', res.getHeaders());
+  console.log('get headers()', res.getHeaders());
   let bodyJSON = req.body;
   // console.log('bodyJSON', bodyJSON);
   let userRole = bodyJSON.userRole;
