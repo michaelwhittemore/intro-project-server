@@ -17,6 +17,9 @@ app.use(cors());
 // trying to allow access
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  console.log('getheaders from req', req.getHeaders());
+  console.log('getheaders from res', res.getHeaders());
+
   // console.log('applied from app.js', res.header); // remove
   // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
