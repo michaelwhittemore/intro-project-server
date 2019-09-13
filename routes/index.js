@@ -53,7 +53,7 @@ function findMatch(userId, queue) {
 
 // start new session, add it to the dict, and return an object conating all the necessary cred
 function getNewSessionCrendtials(userId, res) {
-  console.log("GOT TO NEW SESSIONS")
+  console.log('GOT TO NEW SESSIONS');
   // create the session
   let sessionId;
   let token;
@@ -67,9 +67,8 @@ function getNewSessionCrendtials(userId, res) {
     }
     // add the session to the dict with the userId as the Key
     userSessionDict[userId] = sessionId;
-    res.addHeader('Content-Type', 'application/json');
-    res.addHeader('Access-Control-Allow-Origin', '*');
-    console.log('getNewSessionCredentials res.getHeaders()', res.getHeaders());
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.send({
       apiKey: apiKey,
       sessionId: sessionId,
@@ -125,7 +124,8 @@ router.get('/newUser', (req, res) => {
 
 router.post('/queue', (req, res) => {
   // console.log('FULL VALUE OF THE REQ TO QUEUE', req);
-  console.log('get headers()', res.getHeaders());
+  console.log('get headers():', res.getHeaders());
+  console.log('body:', req.body);
   let bodyJSON = req.body;
   // console.log('bodyJSON', bodyJSON);
   let userRole = bodyJSON.userRole;
@@ -148,7 +148,7 @@ router.post('/queue', (req, res) => {
       makeMatchCredentials(userId, match, res);
     } else {
       // otherwise we generate a new session and send the credentials and put in queue
-      getNewSessionCrendtials(userId, userSessionDict, res);
+      getNewSessionCrendtials(userId, res);
       ideaQueue.push(userId);
     }
   }
