@@ -83,8 +83,9 @@ function makeMatchCredentials(id, matchedId, res) {
   let token = opentok.generateToken(sessionId);
   // now that the match is made we remove it from the dict
   delete userSessionDict[matchedId];
-  delete ideaQueue[matchedId];
-  delete investorQueue[matchedId];
+  // the queues are not arrays and thus need filters not delete
+  ideaQueue = ideaQueue.filter(filterId=> filterId !== matchedId);
+  investorQueue = investorQueue.filter(filterId=> filterId !== matchedId);
   // add the match to the previous matches
   previousMatches.push([id, matchedId]);
 
