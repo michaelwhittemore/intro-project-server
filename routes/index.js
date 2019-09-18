@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const _ = require('lodash');
+// const _ = require('lodash');
 const uuidv1 = require('uuid/v1'); // required to generate user Ids
 require('dotenv').config(); // needs keys from .env
 
@@ -76,16 +76,20 @@ function getNewSessionCrendtials(userId, res) {
     });
   });
 }
+// helper function to remove a userId from queues
+function deleteFromDictAndQueues(id) {
+  delete userSessionDict[id];
+  // the queues are not arrays and thus need filters not delete
+  ideaQueue = ideaQueue.filter(filterId => filterId !== id);
+  investorQueue = investorQueue.filter(filterId => filterId !== id);
+}
 // makeMatchCredentials should take in an id, the id of the matched user
 // needs to return the credentials and also modiy the dict and also add to the matched array
 function makeMatchCredentials(id, matchedId, res) {
   let sessionId = userSessionDict[matchedId];
   let token = opentok.generateToken(sessionId);
-  // now that the match is made we remove it from the dict
-  delete userSessionDict[matchedId];
-  // the queues are not arrays and thus need filters not delete
-  ideaQueue = ideaQueue.filter(filterId=> filterId !== matchedId);
-  investorQueue = investorQueue.filter(filterId=> filterId !== matchedId);
+  // now that the match is made we remove it from the dict and queue
+  deleteFromDictAndQueues(matchedId);
   // add the match to the previous matches
   previousMatches.push([id, matchedId]);
 
@@ -124,8 +128,7 @@ router.get('/newUser', (req, res) => {
 // first we need to verify that the users haven't already met
 
 router.post('/queue', (req, res) => {
-  // console.log('FULL VALUE OF THE REQ TO QUEUE', req);
-  console.log('get headers():', res.getHeaders());
+  // console.log('get headers():', res.getHeaders());
   console.log('body:', req.body);
   let bodyJSON = req.body;
   // console.log('bodyJSON', bodyJSON);
@@ -154,6 +157,27 @@ router.post('/queue', (req, res) => {
     }
   }
 });
+// when a user disconnects before making a connection we must remove them from
+// the queue and the dict
+router.delete('/remove-from-queue', (req, res) => {
+  // the req should have the userId
+  let deleteId = req.body.userId;
+  console.log('canceling matchmaking for ' + deleteId);
+  deleteFromDictAndQueues(deleteId);
+});
+
+router.post('/start-archive', (req, res) => {
+  console.log(req.body);
+  let sessionId = req.body.sessionId;
+  console.log('sessionId for archive', sessionId);
+  opentok.startArchive(sessionId, (error, archive) => {
+    if (error) {
+      console.log(error);
+    }
+    console.log('archive:', archive);
+  });
+});
+
 // get everything in the server state
 // PURELY TROUBLESHOOTING
 router.get('/servertest', (req, res) => {
