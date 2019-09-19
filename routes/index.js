@@ -30,6 +30,8 @@ let ideaQueue = [];
 let previousMatches = [];
 // keeps track of existing sessions that only contain a single user
 let userSessionDict = {};
+// need to directly acces the archive object to stop it
+let sessionArchiveDict = {};
 // makes sure that the users haven't already been matched
 // takes in an investorId and a IdeaId, and the match array and returns true if they haven't met
 function verifyUserMatch(Id1, Id2) {
@@ -53,7 +55,6 @@ function findMatch(userId, queue) {
 
 // start new session, add it to the dict, and return an object conating all the necessary cred
 function getNewSessionCrendtials(userId, res) {
-  console.log('GOT TO NEW SESSIONS');
   // create the session
   let sessionId;
   let token;
@@ -164,18 +165,39 @@ router.delete('/remove-from-queue', (req, res) => {
   let deleteId = req.body.userId;
   console.log('canceling matchmaking for ' + deleteId);
   deleteFromDictAndQueues(deleteId);
+  res.send({});
 });
 
 router.post('/start-archive', (req, res) => {
-  console.log(req.body);
   let sessionId = req.body.sessionId;
-  console.log('sessionId for archive', sessionId);
   opentok.startArchive(sessionId, (error, archive) => {
     if (error) {
       console.log(error);
     }
-    console.log('archive:', archive);
+    let myRes = { id: archive.id };
+    console.log('should respond with', myRes);
+    sessionArchiveDict[sessionId] = archive;
+    res.set({
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.send(myRes);
   });
+});
+
+router.post('/stop-archive', (req, res) => {
+  let sessionId = req.body.sessionId;
+  console.log('sessionId', sessionId);
+  console.log('sessionArchiveDict', sessionArchiveDict);
+  console.log('on stop archive, sessionArchiveDict[sessionId]', sessionArchiveDict[sessionId]);
+  if (sessionArchiveDict[sessionId]) {
+    sessionArchiveDict[sessionId].stop((err, archive) => {
+      if (err) {
+        console.log(err);
+      }
+      res.send(archive);
+    });
+  }
 });
 
 // get everything in the server state
@@ -186,6 +208,7 @@ router.get('/servertest', (req, res) => {
   console.log('investorQueue', investorQueue);
   console.log('previousMatches', previousMatches);
   console.log('userSessionDict', userSessionDict);
+  console.log('sessionArchiveDict', sessionArchiveDict);
 
   res.set({
     'Content-Type': 'application/json',
@@ -196,7 +219,8 @@ router.get('/servertest', (req, res) => {
     ideaQueue: ideaQueue,
     investorQueue: investorQueue,
     previousMatches: previousMatches,
-    userSessionDict: userSessionDict
+    userSessionDict: userSessionDict,
+    sessionArchiveDict: sessionArchiveDict
   });
 });
 router.get('/', (req, res) => {
