@@ -3,7 +3,11 @@ const router = express.Router();
 const path = require('path');
 // const _ = require('lodash');
 const uuidv1 = require('uuid/v1'); // required to generate user Ids
+const fetch = require('node-fetch'); // make call for broadcast
 require('dotenv').config(); // needs keys from .env
+
+// need to generate a JWS token to make a REST API call for broadcasts
+const jwt = require('jsonwebtoken');
 
 const apiKey = process.env.TOKBOX_API_KEY;
 const secret = process.env.TOKBOX_SECRET;
@@ -32,6 +36,34 @@ let previousMatches = [];
 let userSessionDict = {};
 // need to directly acces the archive object to stop it
 let sessionArchiveDict = {};
+
+
+// generate a header object with the signed JWS token for the broadcast request
+// I was having some weird trouble with the token expiring so I passed in the max
+// value for a 32 bit int
+function generateAPIHeader() {
+  let token = jwt.sign({
+    iss: apiKey,
+    ist: 'project',
+    iat: Date.now() / 1000,
+    exp: 4294967290,
+    jti: 'jwt_nonce'
+  }, secret,
+    { algorithm: 'HS256' });
+  console.log(token);
+  return {
+    'X-OPENTOK-AUTH': token,
+    'Content-Type': 'application/json'
+  };
+  // see if it verfies on the server console.log(jwt)
+}
+// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+// DELETE THIS SICK FILTH
+router.get('/jwt', (req, res) => {
+  res.send(generateAPIHeader(req.body.sessionId));
+});
+// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 // makes sure that the users haven't already been matched
 // takes in an investorId and a IdeaId, and the match array and returns true if they haven't met
 function verifyUserMatch(Id1, Id2) {
@@ -99,9 +131,6 @@ function makeMatchCredentials(id, matchedId, res) {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*'
   });
-  // MAKE MATCH ---------------------------------------- THIS MATTERS
-  // -----------------------------------------------------------------
-  // -----------------------------------------------------------------
   res.send({
     apiKey: apiKey,
     sessionId: sessionId,
@@ -109,7 +138,30 @@ function makeMatchCredentials(id, matchedId, res) {
   });
 }
 
-
+async function startBroadcast(sessionId) {
+  const targetURL = `https://api.opentok.com/v2/project/${apiKey}/broadcast`;
+  const headers = generateAPIHeader();
+  const postBody = {
+    sessionId: sessionId,
+    outputs: {
+      hls: {}
+    }
+  };
+  console.log(JSON.stringify(postBody));
+  try {
+    const fetchBroadcast = await fetch(targetURL, {
+      headers: headers,
+      method: 'POST',
+      body: JSON.stringify(postBody)
+    });
+    const fetchRes = await fetchBroadcast.json();
+    console.log(fetchRes);
+    return fetchRes;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+}
 /**
  * //?? should this be more of a GET or POST request??
  * GET /newUser returns a new userId with a respective role
@@ -199,7 +251,13 @@ router.post('/stop-archive', (req, res) => {
     });
   }
 });
-
+// receives a sessionId and uses it to start a broadcast
+// TODO decide how to actually do the url??? possibly just
+// a viewer page??
+router.post('/start-broadcast', async (req, res) => {
+  let broadcastInfo = await startBroadcast(req.body.sessionId);
+  res.send(broadcastInfo);
+});
 // get everything in the server state
 // PURELY TROUBLESHOOTING
 router.get('/servertest', (req, res) => {
