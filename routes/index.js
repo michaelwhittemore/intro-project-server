@@ -36,12 +36,13 @@ let previousMatches = [];
 let userSessionDict = {};
 // need to directly acces the archive object to stop it
 let sessionArchiveDict = {};
-
+// needed to stop broadcast
+let sessionBroadcastDict = {};
 
 // generate a header object with the signed JWS token for the broadcast request
 // I was having some weird trouble with the token expiring so I passed in the max
 // value for a 32 bit int
-function generateAPIHeader() {
+function generateJWToken() {
   let token = jwt.sign({
     iss: apiKey,
     ist: 'project',
@@ -51,18 +52,9 @@ function generateAPIHeader() {
   }, secret,
     { algorithm: 'HS256' });
   console.log(token);
-  return {
-    'X-OPENTOK-AUTH': token,
-    'Content-Type': 'application/json'
-  };
+  return token;
   // see if it verfies on the server console.log(jwt)
 }
-// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-// DELETE THIS SICK FILTH
-router.get('/jwt', (req, res) => {
-  res.send(generateAPIHeader(req.body.sessionId));
-});
-// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 // makes sure that the users haven't already been matched
 // takes in an investorId and a IdeaId, and the match array and returns true if they haven't met
@@ -140,26 +132,46 @@ function makeMatchCredentials(id, matchedId, res) {
 
 async function startBroadcast(sessionId) {
   const targetURL = `https://api.opentok.com/v2/project/${apiKey}/broadcast`;
-  const headers = generateAPIHeader();
   const postBody = {
     sessionId: sessionId,
     outputs: {
       hls: {}
     }
   };
-  console.log(JSON.stringify(postBody));
   try {
     const fetchBroadcast = await fetch(targetURL, {
-      headers: headers,
+      headers: {
+        'X-OPENTOK-AUTH': generateJWToken(),
+        'Content-Type': 'application/json'
+      },
       method: 'POST',
       body: JSON.stringify(postBody)
     });
     const fetchRes = await fetchBroadcast.json();
+    // tie sessionId and broadcastId toghether
+    sessionBroadcastDict[sessionId] = fetchRes.id;
     console.log(fetchRes);
     return fetchRes;
   } catch (err) {
     console.log(err);
     return err;
+  }
+}
+async function stopBroadcast(sessionId) {
+  const broadcastId = sessionBroadcastDict[sessionId];
+  const targetURL = `https://api.opentok.com/v2/project/${apiKey}/broadcast/${broadcastId}/stop`;
+  console.log(`attemtping to stop broadcast sessionId = ${sessionId}, and broadcastId = ${broadcastId}`);
+  try {
+    const fetchStopBroadcast = await fetch(targetURL, {
+      headers: {
+        'X-OPENTOK-AUTH': generateJWToken()
+      },
+      method: 'POST'
+    });
+    const fetchStopRes = await fetchStopBroadcast.json();
+    console.log(fetchStopRes);
+  } catch (err) {
+    console.log(err);
   }
 }
 /**
@@ -252,11 +264,14 @@ router.post('/stop-archive', (req, res) => {
   }
 });
 // receives a sessionId and uses it to start a broadcast
-// TODO decide how to actually do the url??? possibly just
-// a viewer page??
 router.post('/start-broadcast', async (req, res) => {
   let broadcastInfo = await startBroadcast(req.body.sessionId);
   res.send(broadcastInfo);
+});
+// recieves a sessionId and stops the corresponding broadcast
+router.post('/stop-broadcast', async (req, res) => {
+  let stopBroadcastInfo = await stopBroadcast(req.body.sessionId);
+  res.send(stopBroadcastInfo);
 });
 // get everything in the server state
 // PURELY TROUBLESHOOTING
