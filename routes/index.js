@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-// const _ = require('lodash');
 const uuidv1 = require('uuid/v1'); // required to generate user Ids
 const fetch = require('node-fetch'); // make call for broadcast
 require('dotenv').config(); // needs keys from .env
@@ -311,7 +310,7 @@ module.exports = router;
 //---------------------------------------------------------------
 //---------------------------------------------------------------
 //---------------------------------------------------------------
-// -------------------ProvIded Code Base--------------------------
+// -------------------Provided Code Base--------------------------
 //---------------------------------------------------------------
 //---------------------------------------------------------------
 //---------------------------------------------------------------
